@@ -1,59 +1,76 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import validation from './SignupValidation'
-import { useState } from 'react'
-import axios from 'axios'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import validation from './SignupValidation';
+import axios from 'axios';
+import './Login.css';
 
 const Signup = () => {
+  const navigate = useNavigate();
 
-  const [values,setValues] = useState({
-    name:'',
-    email:'',
-    password:''
-  })
-  const [errors,setErrors] = useState({})
+  const [values, setValues] = useState({
+    name: '',
+    email: '',
+    password: ''
+  }); 
+
+  const [errors, setErrors] = useState({});
+
   const handleInput = (event) => {
-    setValues(prev => ({...prev,[event.target.name] : [event.target.value]}))
-  }
-  const handleSubmit =(event) => {
-    event.preventDefault()
-    setErrors(validation(values))
+    setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+  };
 
-    if(errors.name === '' && errors.email === '' && errors.password === ''){
-      axios.post('http://localhost:8081/signup',values)
-      .then(res => console.log(res))
-      .catch(err => console.log(err))
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setErrors(validation(values));
+
+    if (errors.name === '' && errors.email === '' && errors.password === '') {
+      axios
+        .post('http://localhost:8081/signup', values)
+        .then((res) => {
+          navigate('/success');
+        })
+        .catch((err) => console.log(err));
     }
+  };
 
-  }
+  return (
+    <div className="login-page">
+            <div className='topp-circle'></div>
 
-    return (
-        <>
-        <h2>Sign Up</h2>
-        <form action="#" onSubmit={handleSubmit}>
-        <div>
-      <label htmlFor="Name">Name</label>
-      <input type="name" placeholder='Enter Name'name='name' onChange={handleInput}/>
-      {errors.name && <span>{errors.name}</span>}
+      <div className="login-container">
+        <div className="login-form">
+          <h2>Sign Up</h2>
+          <form action="#" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="Name">Name</label>
+              <input type="name" placeholder="Enter Name" name="name" onChange={handleInput} />
+              {errors.name && <span>{errors.name}</span>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input type="email" placeholder="Enter Email" name="email" onChange={handleInput} />
+              {errors.email && <span>{errors.email}</span>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input type="password" placeholder="Enter Password" name="password" onChange={handleInput} />
+              {errors.password && <span>{errors.password}</span>}
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+        </div>
+        <div className="login-info">
+          <h4>Have an account ? <Link to="/login">Login</Link></h4>
+          <div className='logoin'>
+          <h2>Login</h2>
+          <p>Sign Up is a registration process that allows users to create a new account on a website or application. By providing their name, email, and password, users can create a personalized account and access various features and services.</p>
+          </div>
+                  </div>
+      </div>
+      <div className='bottomm-circle'></div>
 
     </div>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input type="email" placeholder='Enter Email' name='email' onChange={handleInput}/>
-          {errors.email && <span>{errors.email}</span>}
+  );
+};
 
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input type="password" placeholder='Enter Password' name='password' onChange={handleInput}/>
-          {errors.password && <span>{errors.password}</span>}
-
-        </div>
-        <button>Sign Up</button>
-        <Link to='/'>Login</Link>
-        </form>
-        </>
-      )
-    }
-
-export default Signup
+export default Signup;
