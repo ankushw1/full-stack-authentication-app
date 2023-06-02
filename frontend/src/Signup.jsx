@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import validation from './SignupValidation'
 import { useState } from 'react'
+import axios from 'axios'
 
 const Signup = () => {
 
@@ -17,6 +18,12 @@ const Signup = () => {
   const handleSubmit =(event) => {
     event.preventDefault()
     setErrors(validation(values))
+
+    if(errors.name === '' && errors.email === '' && errors.password === ''){
+      axios.post('http://localhost:8081/signup',values)
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
+    }
 
   }
 
