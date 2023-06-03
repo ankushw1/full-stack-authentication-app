@@ -27,6 +27,21 @@ app.post('/signup', (req, res) => {
       return res.json(data);
     });
   });
+
+  app.post('/login', (req, res) => {
+    const sql = 'SELECT * FROM login WHERE `email` = ? AND `password` = ?';
+    db.query(sql , [req.body.email, req.body.password] , (err,data) => {
+        if(err){
+            return res.json('Error')
+        }
+        if(data.length > 0){
+            return res.json('Success')
+        }
+        else{
+            return res.json('Failed')
+        }
+    })
+  });
   
 
 app.listen(8081, () => {
