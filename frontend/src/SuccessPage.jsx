@@ -7,7 +7,7 @@ const SuccessPage = () => {
 
   useEffect(() => {
     const redirectTimer = setTimeout(() => {
-      navigate('/');
+      navigate('/login');
     }, 2000);
 
     return () => clearTimeout(redirectTimer);

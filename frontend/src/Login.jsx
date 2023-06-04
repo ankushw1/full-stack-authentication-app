@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import validation from './LoginValidation';
 import axios from 'axios';
+import emailjs from 'emailjs-com';
 import './Login.css';
 
 const Login = () => {
@@ -18,31 +19,69 @@ const Login = () => {
     setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
 
-  const handleNext = () => {
-    setErrors(validation(values));
-    if (errors.email === '') {
-      // Generate OTP and send it to the user's email
-      const otp_val = Math.floor(Math.random() * 10000);
-      setOTP(otp_val);
-      setStep(2);
-    }
+  const generateOTP = () => {
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    setOTP(otp.toString());
+    return otp;
   };
 
-  const handleLogin = () => {
-    if (userOTP === otp) {
-      axios
-        .post('http://localhost:8081/login', values)
-        .then((res) => {
-          if (res.data === 'Success') {
-            navigate('/home');
-          } else {
-            alert('No record existed');
-          }
-        })
-        .catch((err) => console.log(err));
+  const sendOTPEmail = () => {
+    const generatedOTP = generateOTP();
+
+    const templateParams = {
+      to_email: values.email,
+      from_name: 'Max Techies',
+      from_email: 'info@maxtechies.com',
+      otp: generatedOTP,
+    };
+
+    emailjs
+      .send('service_eed7lpc', 'template_ptvp5j6', templateParams, 'Tmj4Q_O-3hyHdBJz6')
+      .then((response) => {
+        console.log('OTP email sent successfully!', response.status, response.text);
+        setOTP(generatedOTP);
+        setStep(2);
+      })
+      .catch((error) => {
+        console.error('Error sending OTP email:', error);
+        alert('Error sending OTP email. Please try again later.');
+      });
+  };
+
+  const loginUser = () => {
+    axios
+      .post('http://localhost:8081/login', values)
+      .then((res) => {
+        if (res.data === 'Success') {
+          // Store the email in local storage
+          localStorage.setItem('userEmail', values.email);
+          navigate('/home');
+        } else {
+          alert('No record exists');
+        }
+      })
+      .catch(err => console.log(err))
+  };
+
+  const verifyOTP = () => {
+    if (Number(userOTP) === Number(otp)) {
+      loginUser();
     } else {
       alert('Invalid OTP');
     }
+  };
+
+  const handleNext = () => {
+    const validationErrors = validation(values);
+    setErrors(validationErrors);
+    if (!validationErrors.email) {
+      sendOTPEmail();
+    }
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    verifyOTP();
   };
 
   return (
@@ -79,11 +118,20 @@ const Login = () => {
             Don't have an account? <Link to="/">Sign Up</Link>
           </h4>
           <div className="logoin">
-            <h2>Login</h2>
-            <p>
-              Login is a secure authentication process that allows users to access their personal accounts on a website or
-              application.
-            </p>
+            {step === 1 && (
+              <div>
+                <h2>Login</h2>
+                Login to your account and unlock a world of possibilities. Simply enter your email to securely access your
+                account.
+              </div>
+            )}
+            {step === 2 && (
+              <div>
+                <h2>Validate OTP</h2>
+                Validate the OTP sent to your email to proceed with login. Enter the OTP received in the field above and
+                click "Log In" to access your account.
+              </div>
+            )}
           </div>
         </div>
       </div>
